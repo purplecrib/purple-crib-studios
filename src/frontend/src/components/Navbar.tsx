@@ -2,8 +2,75 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "@/types";
-import { Menu, Phone, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, Moon, Phone, Sun, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
+function ThemeToggle({ className }: { className?: string }) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <span
+        className={cn(
+          "w-8 h-8 rounded-full inline-flex items-center justify-center",
+          className,
+        )}
+        aria-hidden
+      />
+    );
+  }
+
+  const isDark = resolvedTheme === "dark";
+
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      data-ocid="navbar.theme_toggle"
+      className={cn(
+        "relative w-8 h-8 rounded-full flex items-center justify-center",
+        "text-muted-foreground hover:text-foreground",
+        "hover:bg-muted/40 transition-colors duration-200 cursor-pointer",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {isDark ? (
+          <motion.span
+            key="sun"
+            initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+            exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute"
+          >
+            <Sun className="size-4" />
+          </motion.span>
+        ) : (
+          <motion.span
+            key="moon"
+            initial={{ rotate: 90, opacity: 0, scale: 0.6 }}
+            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+            exit={{ rotate: -90, opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute"
+          >
+            <Moon className="size-4" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
+  );
+}
 
 export function Navbar() {
   const isMobile = useIsMobile();
@@ -57,8 +124,9 @@ export function Navbar() {
           </nav>
         )}
 
-        {/* CTA */}
-        <div className="flex items-center gap-3">
+        {/* CTA + Theme Toggle */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           {!isMobile && (
             <Button
               asChild

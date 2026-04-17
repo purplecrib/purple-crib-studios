@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Briefcase, Camera, CheckCircle2 } from "lucide-react";
-import { motion } from "motion/react";
+import { type Variants, motion, useReducedMotion } from "motion/react";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const PHOTOGRAPHY_FEATURES = [
   "Wedding Photography",
@@ -30,6 +32,21 @@ interface ServiceCardProps {
   reversed?: boolean;
 }
 
+const chipVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const chipItem: Variants = {
+  hidden: { opacity: 0, scale: 0.85, y: 8 },
+  visible: { opacity: 1, scale: 1, y: 0 },
+};
+
 function ServiceCard({
   icon,
   iconBg,
@@ -41,6 +58,8 @@ function ServiceCard({
   ocidPrefix,
   reversed,
 }: ServiceCardProps) {
+  const prefersReduced = useReducedMotion();
+
   const scrollToContact = () => {
     document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -52,14 +71,17 @@ function ServiceCard({
     >
       {/* Visual panel */}
       <motion.div
-        initial={{ opacity: 0, x: reversed ? 40 : -40 }}
+        initial={prefersReduced ? {} : { opacity: 0, x: reversed ? 60 : -60 }}
         whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.8, ease: EASE }}
         className="w-full lg:w-1/2 flex-shrink-0"
       >
-        <div className="relative rounded-2xl overflow-hidden border border-border/40 shadow-elevated bg-card">
-          {/* Service visual */}
+        <motion.div
+          whileHover={{ y: -4, boxShadow: "0 24px 48px rgba(0,0,0,0.3)" }}
+          transition={{ duration: 0.3, ease: EASE }}
+          className="relative rounded-2xl overflow-hidden border border-border/40 shadow-elevated bg-card"
+        >
           <div
             className="h-64 lg:h-80 relative flex items-center justify-center"
             style={{
@@ -69,14 +91,21 @@ function ServiceCard({
             }}
           >
             {/* Feature chips grid */}
-            <div className="absolute inset-0 grid grid-cols-2 gap-3 p-6 items-center content-center">
-              {features.map((f, i) => (
+            <motion.div
+              variants={chipVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="absolute inset-0 grid grid-cols-2 gap-3 p-6 items-center content-center"
+            >
+              {features.map((f) => (
                 <motion.div
                   key={f}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.07 + 0.3 }}
+                  variants={chipItem}
+                  whileHover={{
+                    scale: 1.05,
+                    backgroundColor: "oklch(0.28 0.02 280 / 0.9)",
+                  }}
                   className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 text-xs font-medium text-foreground flex items-center gap-2"
                 >
                   <span
@@ -85,7 +114,7 @@ function ServiceCard({
                   <span className="truncate">{f}</span>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Icon badge */}
             <div
@@ -94,15 +123,15 @@ function ServiceCard({
               {icon}
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Content */}
       <motion.div
-        initial={{ opacity: 0, x: reversed ? -40 : 40 }}
+        initial={prefersReduced ? {} : { opacity: 0, x: reversed ? -60 : 60 }}
         whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.8, delay: 0.15, ease: EASE }}
         className="w-full lg:w-1/2"
       >
         <div className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
@@ -115,28 +144,53 @@ function ServiceCard({
           {description}
         </p>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-8">
+        <motion.ul
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={{
+            hidden: {},
+            visible: {
+              transition: { staggerChildren: 0.06, delayChildren: 0.2 },
+            },
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-8"
+        >
           {features.map((f) => (
-            <li
+            <motion.li
               key={f}
+              variants={{
+                hidden: { opacity: 0, x: -16 },
+                visible: {
+                  opacity: 1,
+                  x: 0,
+                  transition: { duration: 0.4, ease: EASE },
+                },
+              }}
               className="flex items-center gap-2.5 text-sm text-muted-foreground"
             >
               <CheckCircle2
                 className={`size-4 shrink-0 ${reversed ? "text-accent" : "text-primary"}`}
               />
               {f}
-            </li>
+            </motion.li>
           ))}
-        </ul>
+        </motion.ul>
 
-        <Button
-          onClick={scrollToContact}
-          className="gradient-accent text-accent-foreground font-semibold border-0 hover:opacity-90 transition-smooth"
-          data-ocid={`${ocidPrefix}.cta_button`}
+        <motion.div
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="inline-block"
         >
-          {ctaLabel}
-          <ArrowRight className="size-4" />
-        </Button>
+          <Button
+            onClick={scrollToContact}
+            className="gradient-accent text-accent-foreground font-semibold border-0 hover:opacity-90 transition-smooth"
+            data-ocid={`${ocidPrefix}.cta_button`}
+          >
+            {ctaLabel}
+            <ArrowRight className="size-4" />
+          </Button>
+        </motion.div>
       </motion.div>
     </div>
   );
@@ -152,15 +206,21 @@ export function ServicesSection() {
       <div className="container mx-auto px-4 lg:px-8">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease: EASE }}
           className="text-center mb-20"
         >
-          <div className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: EASE }}
+            className="text-xs font-semibold tracking-widest uppercase text-primary mb-3"
+          >
             What We Do
-          </div>
+          </motion.div>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-5">
             Two Powerhouses, <span className="text-gradient">One Agency</span>
           </h2>

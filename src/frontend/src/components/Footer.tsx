@@ -1,11 +1,28 @@
 import { Facebook, Instagram, MapPin, Phone, Youtube } from "lucide-react";
+import type { Variants } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
+const colVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.05 },
+  },
+};
+
+const colItem: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
 export function Footer() {
   const year = new Date().getFullYear();
+  const prefersReduced = useReducedMotion();
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "purplecrib.ng";
   const utmLink = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`;
@@ -17,9 +34,18 @@ export function Footer() {
     >
       <div className="container mx-auto px-4 lg:px-8">
         {/* Main footer grid */}
-        <div className="py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <motion.div
+          variants={prefersReduced ? {} : colVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          className="py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10"
+        >
           {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <motion.div
+            variants={prefersReduced ? {} : colItem}
+            className="sm:col-span-2 lg:col-span-1"
+          >
             <div className="flex items-center gap-2.5 mb-4">
               <img
                 src="/assets/generated/purplecrib-logo-mark-transparent.dim_200x200.png"
@@ -36,41 +62,46 @@ export function Footer() {
               premier creative agency since 2013.
             </p>
             <div className="flex items-center gap-3">
-              <a
-                href="https://instagram.com/purplecrib.ng"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-muted/40 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-smooth"
-                aria-label="Instagram"
-                data-ocid="footer.instagram_link"
-              >
-                <Instagram className="size-3.5" />
-              </a>
-              <a
-                href="https://facebook.com/purplecrib"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-muted/40 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-smooth"
-                aria-label="Facebook"
-                data-ocid="footer.facebook_link"
-              >
-                <Facebook className="size-3.5" />
-              </a>
-              <a
-                href="https://youtube.com/@purplecrib"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-muted/40 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-smooth"
-                aria-label="YouTube"
-                data-ocid="footer.youtube_link"
-              >
-                <Youtube className="size-3.5" />
-              </a>
+              {[
+                {
+                  href: "https://instagram.com/purplecrib.ng",
+                  label: "Instagram",
+                  icon: Instagram,
+                  ocid: "footer.instagram_link",
+                },
+                {
+                  href: "https://facebook.com/purplecrib",
+                  label: "Facebook",
+                  icon: Facebook,
+                  ocid: "footer.facebook_link",
+                },
+                {
+                  href: "https://youtube.com/@purplecrib",
+                  label: "YouTube",
+                  icon: Youtube,
+                  ocid: "footer.youtube_link",
+                },
+              ].map(({ href, label, icon: Icon, ocid }) => (
+                <motion.a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  data-ocid={ocid}
+                  whileHover={prefersReduced ? {} : { scale: 1.15, y: -2 }}
+                  whileTap={prefersReduced ? {} : { scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-8 h-8 rounded-lg bg-muted/40 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-smooth"
+                >
+                  <Icon className="size-3.5" />
+                </motion.a>
+              ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Photography services */}
-          <div>
+          <motion.div variants={prefersReduced ? {} : colItem}>
             <h4 className="font-display font-semibold text-foreground text-sm mb-4">
               Photography
             </h4>
@@ -94,10 +125,10 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Business solutions */}
-          <div>
+          <motion.div variants={prefersReduced ? {} : colItem}>
             <h4 className="font-display font-semibold text-foreground text-sm mb-4">
               Business Solutions
             </h4>
@@ -119,10 +150,10 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Contact */}
-          <div>
+          <motion.div variants={prefersReduced ? {} : colItem}>
             <h4 className="font-display font-semibold text-foreground text-sm mb-4">
               Contact Us
             </h4>
@@ -155,11 +186,17 @@ export function Footer() {
             >
               Get In Touch →
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Bottom bar */}
-        <div className="py-5 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <motion.div
+          initial={prefersReduced ? {} : { opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="py-5 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3"
+        >
           <p className="text-xs text-muted-foreground">
             © {year} Purple Crib Studios. All rights reserved.
           </p>
@@ -173,7 +210,7 @@ export function Footer() {
               Built with love using caffeine.ai
             </a>
           </p>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );

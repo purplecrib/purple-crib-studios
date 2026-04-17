@@ -22,8 +22,39 @@ import {
   Phone,
   Send,
 } from "lucide-react";
-import { motion } from "motion/react";
+import type { Variants } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+const infoVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.25 },
+  },
+};
+
+const infoItem: Variants = {
+  hidden: { opacity: 0, x: -24 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.55, ease: "easeOut" },
+  },
+};
+
+const fieldVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08, delayChildren: 0.2 },
+  },
+};
+
+const fieldItem: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 const CONTACT_INFO = [
   {
@@ -56,6 +87,7 @@ const INITIAL_FORM: SubmitContactForm = {
 
 export function ContactSection() {
   const { actor } = useActor(createActor);
+  const prefersReduced = useReducedMotion();
   const [form, setForm] = useState<SubmitContactForm>(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -102,7 +134,6 @@ export function ContactSection() {
           );
         }
       } else {
-        // Fallback when actor not yet ready
         await new Promise((r) => setTimeout(r, 1000));
         setSubmitted(true);
       }
@@ -131,33 +162,62 @@ export function ContactSection() {
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Left info */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={prefersReduced ? {} : { opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8, ease: EASE }}
           >
-            <div className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">
+            <motion.div
+              initial={prefersReduced ? {} : { opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+              className="text-xs font-semibold tracking-widest uppercase text-primary mb-3"
+            >
               Get In Touch
-            </div>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
+            </motion.div>
+            <motion.h2
+              initial={prefersReduced ? {} : { opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.15, ease: EASE }}
+              className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight"
+            >
               Let's Create{" "}
               <span className="text-gradient">Something Great</span>
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-10 text-lg">
+            </motion.h2>
+            <motion.p
+              initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
+              className="text-muted-foreground leading-relaxed mb-10 text-lg"
+            >
               Ready to elevate your brand? Tell us about your project and we'll
               get back to you within 24 hours with a tailored proposal.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col gap-6">
+            <motion.div
+              variants={prefersReduced ? {} : infoVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="flex flex-col gap-6"
+            >
               {CONTACT_INFO.map((info) => (
-                <div
+                <motion.div
                   key={info.label}
+                  variants={prefersReduced ? {} : infoItem}
                   className="flex items-start gap-4"
                   data-ocid={`contact.info_${info.label.toLowerCase()}`}
                 >
-                  <div className="w-10 h-10 rounded-lg gradient-accent flex items-center justify-center shrink-0">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-10 h-10 rounded-lg gradient-accent flex items-center justify-center shrink-0"
+                  >
                     <info.icon className="size-4 text-accent-foreground" />
-                  </div>
+                  </motion.div>
                   <div>
                     <div className="text-xs text-muted-foreground font-medium mb-0.5">
                       {info.label}
@@ -175,12 +235,18 @@ export function ContactSection() {
                       </span>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Business hours */}
-            <div className="mt-10 p-5 rounded-xl bg-card border border-border/50">
+            <motion.div
+              initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
+              className="mt-10 p-5 rounded-xl bg-card border border-border/50"
+            >
               <h4 className="font-display font-semibold text-foreground text-sm mb-3">
                 Studio Hours
               </h4>
@@ -198,27 +264,33 @@ export function ContactSection() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Right form */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
+            initial={prefersReduced ? {} : { opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
           >
             <div className="bg-card rounded-2xl border border-border/60 p-8 shadow-elevated">
               {submitted ? (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.92 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, ease: EASE }}
                   className="flex flex-col items-center justify-center text-center py-10 gap-4"
                   data-ocid="contact.success_state"
                 >
-                  <div className="w-16 h-16 rounded-full gradient-accent flex items-center justify-center shadow-glow">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+                    className="w-16 h-16 rounded-full gradient-accent flex items-center justify-center shadow-glow"
+                  >
                     <CheckCircle2 className="size-8 text-accent-foreground" />
-                  </div>
+                  </motion.div>
                   <h3 className="font-display text-xl font-bold text-foreground">
                     Message Sent!
                   </h3>
@@ -249,13 +321,20 @@ export function ContactSection() {
                   </Button>
                 </motion.div>
               ) : (
-                <form
+                <motion.form
+                  variants={prefersReduced ? {} : fieldVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
                   onSubmit={handleSubmit}
                   className="flex flex-col gap-5"
                   noValidate
                   data-ocid="contact.form"
                 >
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <motion.div
+                    variants={prefersReduced ? {} : fieldItem}
+                    className="grid sm:grid-cols-2 gap-4"
+                  >
                     <div className="flex flex-col gap-1.5">
                       <Label
                         htmlFor="contact-name"
@@ -334,9 +413,12 @@ export function ContactSection() {
                         </p>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <motion.div
+                    variants={prefersReduced ? {} : fieldItem}
+                    className="grid sm:grid-cols-2 gap-4"
+                  >
                     <div className="flex flex-col gap-1.5">
                       <Label
                         htmlFor="contact-phone"
@@ -402,9 +484,12 @@ export function ContactSection() {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex flex-col gap-1.5">
+                  <motion.div
+                    variants={prefersReduced ? {} : fieldItem}
+                    className="flex flex-col gap-1.5"
+                  >
                     <Label
                       htmlFor="contact-message"
                       className="text-sm font-medium"
@@ -438,41 +523,45 @@ export function ContactSection() {
                         {errors.message}
                       </p>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* Server error */}
                   {serverError && (
-                    <div
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
                       className="flex items-center gap-2.5 p-3.5 rounded-lg bg-destructive/10 border border-destructive/30 text-sm text-destructive"
                       data-ocid="contact.error_state"
                     >
                       <AlertCircle className="size-4 shrink-0" />
                       {serverError}
-                    </div>
+                    </motion.div>
                   )}
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="gradient-accent text-accent-foreground font-semibold border-0 hover:opacity-90 transition-smooth h-11 text-sm"
-                    data-ocid="contact.submit_button"
-                  >
-                    {loading ? (
-                      <span
-                        className="flex items-center gap-2"
-                        data-ocid="contact.loading_state"
-                      >
-                        <span className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        Sending...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <Send className="size-4" />
-                        Send Message
-                      </span>
-                    )}
-                  </Button>
-                </form>
+                  <motion.div variants={prefersReduced ? {} : fieldItem}>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full gradient-accent text-accent-foreground font-semibold border-0 hover:opacity-90 transition-smooth h-11 text-sm"
+                      data-ocid="contact.submit_button"
+                    >
+                      {loading ? (
+                        <span
+                          className="flex items-center gap-2"
+                          data-ocid="contact.loading_state"
+                        >
+                          <span className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          Sending...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Send className="size-4" />
+                          Send Message
+                        </span>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.form>
               )}
             </div>
           </motion.div>
