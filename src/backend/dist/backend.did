@@ -1,0 +1,35 @@
+type Timestamp = int;
+type SubmitResult = 
+ variant {
+   err: text;
+   ok: SubmissionId;
+ };
+type SubmitContactForm = 
+ record {
+   email: text;
+   message: text;
+   name: text;
+   phone: text;
+   serviceInterest: text;
+ };
+type SubmissionId = nat;
+type ServiceInterest = 
+ variant {
+   Both;
+   BusinessSolutions;
+   Photography;
+ };
+type ContactSubmission = 
+ record {
+   email: text;
+   id: SubmissionId;
+   message: text;
+   name: text;
+   phone: text;
+   serviceInterest: ServiceInterest;
+   submittedAt: Timestamp;
+ };
+service : {
+  listContactSubmissions: () -> (vec ContactSubmission) query;
+  submitContactForm: (form: SubmitContactForm) -> (SubmitResult);
+}

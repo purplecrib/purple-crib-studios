@@ -1,0 +1,26 @@
+// Version: 1.0.0
+type ContactSubmission__93684224 =
+  {
+    email : Text;
+    id : SubmissionId__741433157;
+    message : Text;
+    name : Text;
+    phone : Text;
+    serviceInterest : ServiceInterest__35501641;
+    submittedAt : Timestamp__301639476
+  };
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type ServiceInterest__35501641 = {#Both; #BusinessSolutions; #Photography};
+type SubmissionId__741433157 = Nat;
+type Timestamp__301639476 = Int;
+actor {
+  stable nextId : {var value : SubmissionId__741433157};
+  stable var nextIdValue : Nat;
+  stable submissions :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?ContactSubmission__93684224]];
+      var elementIndex : Nat__490723111
+    }
+};
